@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- No namespace here as we will share this description. Access with slash at the beginning -->
+  <arg name="first_bot"  default="robot1_tf"/>
+  <arg name="init_pose1" value="-x -1 -y 0 -z 0" />
+  <arg name="second_bot"  default="robot2_tf"/>
+  <arg name="init_pose2" value="-x 1 -y 0 -z 0" />
+
+  <!-- BEGIN ROBOT 1 -->
+  <group ns="robot1">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro' robot_namespace:=$(arg first_bot)"/>
+    <remap from="tf_prefix" to="$(arg first_bot)/"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+      <!-- <remap from="tf_prefix" to="$(arg first_bot)/"/> -->
+    </node>
+
+    <node name="rosbot_spawn" pkg="gazebo_ros" type="spawn_model" args="$(arg init_pose1) -urdf -param robot_description -model $(arg first_bot)" output="screen"/>
+  </group>
+
+  <!-- BEGIN ROBOT 2 -->
+  <group ns="robot2">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro' robot_namespace:=$(arg second_bot)"/>
+    <remap from="tf_prefix" to="$(arg second_bot)/"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+      <!-- <remap from="tf_prefix" to="$(arg second_bot)/"/> -->
+    </node>
+
+    <node name="rosbot_spawn" pkg="gazebo_ros" type="spawn_model" args="$(arg init_pose2) -urdf -param robot_description -model $(arg second_bot)" output="screen"/>
+  </group>
+</launch>

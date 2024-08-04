@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- Arguments for robot names and initial poses -->
+  <arg name="robot1_name" default="robot1"/>
+  <arg name="robot1_init_pose" default="-x 0 -y 0 -z 0"/>
+  <arg name="robot2_name" default="robot2"/>
+  <arg name="robot2_init_pose" default="-x 1 -y 1 -z 0"/>
+
+  <!-- Load joint state controller configuration -->
+  <rosparam command="load" file="$(find joint_state_controller)/joint_state_controller.yaml" />
+
+  <!-- Group for Robot 1 -->
+  <group ns="$(arg robot1_name)">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro'"/>
+    <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="joint_state_controller" />
+    <node name="rosbot_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model $(arg robot1_name) $(arg robot1_init_pose)" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  </group>
+
+  <!-- Group for Robot 2 -->
+  <group ns="$(arg robot2_name)">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro'"/>
+    <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="joint_state_controller" />
+    <node name="rosbot_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model $(arg robot2_name) $(arg robot2_init_pose)" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  </group>
+
+</launch>
