@@ -20,6 +20,7 @@
 
   <!-- MOVE BASE-->
     <include file="$(find multiple_robots_nav)/launch/move_base_robot1.launch" />
+    <include file="$(find multiple_robots_nav)/launch/move_base_robot2.launch" />
 
 
     
