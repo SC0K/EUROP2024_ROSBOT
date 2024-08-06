@@ -22,7 +22,7 @@ def done_cb(status, result):
 
 rospy.init_node('send_goal')
 
-navclient = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+navclient = actionlib.SimpleActionClient('/robot1/move_base', MoveBaseAction)
 navclient.wait_for_server()
 
 # Example of navigation goal
@@ -30,13 +30,13 @@ goal = MoveBaseGoal()
 goal.target_pose.header.frame_id = "map"
 goal.target_pose.header.stamp = rospy.Time.now()
 
-goal.target_pose.pose.position.x = -2.16
-goal.target_pose.pose.position.y = 0.764
+goal.target_pose.pose.position.x = -3.6
+goal.target_pose.pose.position.y = 0.0
 goal.target_pose.pose.position.z = 0.0
 goal.target_pose.pose.orientation.x = 0.0
 goal.target_pose.pose.orientation.y = 0.0
-goal.target_pose.pose.orientation.z = 0.662
-goal.target_pose.pose.orientation.w = 0.750
+goal.target_pose.pose.orientation.z = 0.0
+goal.target_pose.pose.orientation.w = 1.0
 
 navclient.send_goal(goal, done_cb, active_cb, feedback_cb)
 finished = navclient.wait_for_result()

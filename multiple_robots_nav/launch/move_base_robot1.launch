@@ -6,7 +6,7 @@
   <arg name="odom_topic" default="/robot1/odom" />
   <arg name="laser_topic" default="/robot1/scan" />
 
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" ns="robot1">
     <rosparam file="$(find rosbot_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find rosbot_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find rosbot_navigation)/config/local_costmap_params.yaml" command="load" />

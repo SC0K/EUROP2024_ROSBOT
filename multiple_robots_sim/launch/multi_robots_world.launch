@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
 
-  <include file="$(find multiple_robots_sim)/launch/robots_roundabout.launch"></include>
+  <include file="$(find multiple_robots_sim)/launch/robots.launch"></include>
   <!-- <include file="$(find multiple_robots_sim)/launch/robots2.launch"></include> -->
 
-  <include file="$(find rosbot_gazebo)/launch/roundabout.launch"></include>
+  <include file="$(find rosbot_gazebo)/launch/maze_world.launch"></include>
 
 </launch>
