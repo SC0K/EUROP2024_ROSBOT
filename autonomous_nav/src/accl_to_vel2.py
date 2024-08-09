@@ -20,7 +20,7 @@ class AccelToCmdVel:
         self.angular_vel = 0.0
         self.max_linear_vel = 1.0  # Maximum linear velocity (m/s)
         self.max_angular_vel = 1.0  # Maximum angular velocity (rad/s)
-        self.friction_factor = 0.1  # Simple friction factor
+        # self.friction_factor = 0.1  # Simple friction factor
         self.last_time = rospy.Time.now()
 
         # Subscribers
@@ -59,10 +59,10 @@ class AccelToCmdVel:
         target_angle = math.atan2(self.accel_y, self.accel_x)
 
         # Compute the difference between the target angle and the current orientation
-        angle_diff = target_angle - self.current_yaw
+        angle_diff = self.current_yaw - target_angle 
 
         # Normalize the angle difference to the range [-pi, pi]
-        angle_diff = (angle_diff + math.pi) % (2 * math.pi) - math.pi
+        # angle_diff = (angle_diff + math.pi) % (2 * math.pi) - math.pi
 
         # Compute the forward acceleration and angular velocity
         forward_accel = accel_magnitude * math.cos(angle_diff)
@@ -71,14 +71,6 @@ class AccelToCmdVel:
         # Integrate accelerations to update velocities
         self.forward_vel += forward_accel * dt
         self.angular_vel += angular_acceleration * dt
-
-        # Apply friction to gradually reduce velocity (optional, can be commented out if not needed)
-        self.forward_vel *= (1 - self.friction_factor * dt)
-        self.angular_vel *= (1 - self.friction_factor * dt)
-
-        # Limit velocities to their maximum values
-        self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
-        self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
 
         # Create Twist message
         twist = Twist()
