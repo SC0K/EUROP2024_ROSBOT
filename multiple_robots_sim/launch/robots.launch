@@ -9,7 +9,7 @@
     <!-- Husarion robot allows user to define the namespace using the 'robot_namespace' parameter -->
     <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro' robot_namespace:=$(arg first_bot) odom_id:=$(arg first_bot)"/>
     <include file="$(find multiple_robots_sim)/launch/one_robot.launch">
-      <arg name="init_pose" value="-x -1 -y 0 -z 0" />
+      <arg name="init_pose" value="-x -3 -y 0 -z 0 -R 0 -P 0 -Y 0" />
       <arg name="robot_name" value="robot1" />
     </include>
     <param name="tf_prefix" value="$(arg first_bot)" />
@@ -19,7 +19,7 @@
   <group ns="robot2">
     <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro' robot_namespace:=$(arg second_bot) odom_id:=$(arg second_bot)"/>
     <include file="$(find multiple_robots_sim)/launch/one_robot.launch">
-      <arg name="init_pose" value="-x 1 -y 0 -z 0" />
+      <arg name="init_pose" value="-x 3 -y 0 -z 0 -R 0 -P 0 -Y 3.1415" />
       <arg name="robot_name" value="robot2" />
     </include>
     <param name="tf_prefix" value="$(arg second_bot)" />

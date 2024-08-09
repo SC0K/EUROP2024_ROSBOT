@@ -4,6 +4,6 @@
   <include file="$(find multiple_robots_sim)/launch/robots.launch"></include>
   <!-- <include file="$(find multiple_robots_sim)/launch/robots2.launch"></include> -->
 
-  <include file="$(find rosbot_gazebo)/launch/maze_world.launch"></include>
+  <include file="$(find rosbot_gazebo)/launch/closed_room.launch"></include>
 
 </launch>

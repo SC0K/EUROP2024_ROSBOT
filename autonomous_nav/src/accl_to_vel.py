@@ -37,6 +37,7 @@ class AccelToCmdVel:
     def update_and_publish(self, event):
         current_time = rospy.Time.now()
         dt = (current_time - self.last_time).to_sec()
+        rospy.loginfo(dt)
         self.last_time = current_time
 
         # Integrate accelerations to update velocities

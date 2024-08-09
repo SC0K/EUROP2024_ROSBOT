@@ -32,7 +32,7 @@ class AccelToCmdVel:
         self.cmd_vel_pub = rospy.Publisher('/robot1/cmd_vel', Twist, queue_size=10)
 
         # Timer to update and publish velocities
-        self.timer = rospy.Timer(rospy.Duration(0.1), self.update_and_publish)
+        self.timer = rospy.Timer(rospy.Duration(0.3), self.update_and_publish)
 
     def accel_x_callback(self, msg):
         self.accel_x = msg.data
@@ -48,8 +48,10 @@ class AccelToCmdVel:
         )
 
     def update_and_publish(self, event):
+        # Calculate time step since last update
         current_time = rospy.Time.now()
         dt = (current_time - self.last_time).to_sec()
+        rospy.loginfo(f"Time step: {dt} seconds")
         self.last_time = current_time
 
         # Compute the magnitude and direction of the acceleration vector
@@ -64,16 +66,15 @@ class AccelToCmdVel:
 
         # Compute the forward acceleration and angular velocity
         forward_accel = accel_magnitude * math.cos(angle_diff)
-
         angular_acceleration = angle_diff
 
         # Integrate accelerations to update velocities
         self.forward_vel += forward_accel * dt
         self.angular_vel += angular_acceleration * dt
 
-        # # Apply friction to gradually reduce velocity
-        # self.forward_vel *= (1 - self.friction_factor * dt)
-        # self.angular_vel *= (1 - self.friction_factor * dt)
+        # Apply friction to gradually reduce velocity (optional, can be commented out if not needed)
+        self.forward_vel *= (1 - self.friction_factor * dt)
+        self.angular_vel *= (1 - self.friction_factor * dt)
 
         # Limit velocities to their maximum values
         self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
