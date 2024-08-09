@@ -18,9 +18,9 @@ class AccelToCmdVel:
         self.current_yaw = 0.0
         self.forward_vel = 0.0
         self.angular_vel = 0.0
-        self.max_linear_vel = 1.0  # Maximum linear velocity (m/s)
-        self.max_angular_vel = 1.0  # Maximum angular velocity (rad/s)
-        # self.friction_factor = 0.1  # Simple friction factor
+        self.max_linear_vel = 0.3  # Maximum linear velocity (m/s)
+        self.max_angular_vel = 0.3  # Maximum angular velocity (rad/s)
+        self.Kp = 0.5  # Proportional control constant for angular velocity
         self.last_time = rospy.Time.now()
 
         # Subscribers
@@ -62,15 +62,21 @@ class AccelToCmdVel:
         angle_diff = self.current_yaw - target_angle 
 
         # Normalize the angle difference to the range [-pi, pi]
-        # angle_diff = (angle_diff + math.pi) % (2 * math.pi) - math.pi
+        angle_diff = (angle_diff + math.pi) % (2 * math.pi) - math.pi
 
         # Compute the forward acceleration and angular velocity
         forward_accel = accel_magnitude * math.cos(angle_diff)
-        angular_acceleration = angle_diff
+        angular_acceleration = -angle_diff * self.Kp
 
         # Integrate accelerations to update velocities
         self.forward_vel += forward_accel * dt
         self.angular_vel += angular_acceleration * dt
+
+        # Limit forward velocity to prevent excessive speed
+        self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
+
+        # Limit angular velocity to prevent excessive turning
+        self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
 
         # Create Twist message
         twist = Twist()
