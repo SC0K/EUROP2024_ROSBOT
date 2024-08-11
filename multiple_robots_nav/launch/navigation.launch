@@ -5,7 +5,7 @@
   
 
   <!-- Run the map server -->
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find multiple_robots_nav)/maps/closed_room_obstacle.yaml" >
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find multiple_robots_nav)/maps/closed_room.yaml" >
     <param name="frame_id" value="map"/>
   </node>
 
@@ -29,6 +29,11 @@
   <!-- MOVE BASE-->
     <include file="$(find multiple_robots_nav)/launch/move_base_robot1.launch" />
     <include file="$(find multiple_robots_nav)/launch/move_base_robot2.launch" />
+
+
+  <!-- Launching Acceleration converters for the robots-->
+  <node pkg="autonomous_nav" type="accl_to_vel_bot1.py" name="accl_to_vel_bot1" output="screen"/>
+  <node pkg="autonomous_nav" type="accl_to_vel_bot2.py" name="accl_to_vel_bot2" output="screen"/>
 
 
     

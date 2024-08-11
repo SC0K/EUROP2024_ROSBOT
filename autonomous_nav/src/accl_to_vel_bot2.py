@@ -18,20 +18,20 @@ class AccelToCmdVel:
         self.current_yaw = 0.0
         self.forward_vel = 0.0
         self.angular_vel = 0.0
-        self.max_linear_vel = 0.2  # Maximum linear velocity (m/s)
-        self.max_angular_vel = 1.75  # Maximum angular velocity (rad/s)
+        self.max_linear_vel = 0.1 # Maximum linear velocity (m/s)
+        self.max_angular_vel = 0.4  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 
         # Subscribers
-        rospy.Subscriber('/robot1/accel_x', Float32, self.accel_x_callback)
-        rospy.Subscriber('/robot1/accel_y', Float32, self.accel_y_callback)
-        rospy.Subscriber('/robot1/odom', Odometry, self.odom_callback)
+        rospy.Subscriber('/robot2/accel_x', Float32, self.accel_x_callback)
+        rospy.Subscriber('/robot2/accel_y', Float32, self.accel_y_callback)
+        rospy.Subscriber('/robot2/odom', Odometry, self.odom_callback)
 
         # Publisher
-        self.cmd_vel_pub = rospy.Publisher('/robot1/cmd_vel', Twist, queue_size=10)
+        self.cmd_vel_pub = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
 
         # Timer to update and publish velocities
-        self.timer = rospy.Timer(rospy.Duration(0.2), self.update_and_publish)
+        self.timer = rospy.Timer(rospy.Duration(0.4), self.update_and_publish)
 
     def accel_x_callback(self, msg):
         self.accel_x = msg.data
@@ -52,7 +52,7 @@ class AccelToCmdVel:
         # Calculate time step since last update
         current_time = rospy.Time.now()
         dt = (current_time - self.last_time).to_sec()
-        rospy.loginfo(f"Time step: {dt} seconds")
+        # rospy.loginfo(f"Time step: {dt} seconds")
         self.last_time = current_time
 
         # Compute the forward acceleration and angular velocity
@@ -73,8 +73,8 @@ class AccelToCmdVel:
             else:
                 self.angular_vel = (self.accel_y/math.cos(self.current_yaw) - self.accel_x*math.tan(self.current_yaw)/math.cos(self.current_yaw))/self.forward_vel/((math.tan(self.current_yaw))**2+1)
                 forward_accel = (self.accel_y - self.forward_vel*math.cos(self.current_yaw)*self.angular_vel)/math.sin(self.current_yaw)
-        rospy.loginfo(f"Current Yaw: {self.current_yaw:.2f} ")
-        rospy.loginfo(f"Forward velocity: {self.forward_vel:.2f} m/s")
+        # rospy.loginfo(f"Current Yaw: {self.current_yaw:.2f} ")
+        # rospy.loginfo(f"Forward velocity: {self.forward_vel:.2f} m/s")
         # Integrate accelerations to update velocities
         self.forward_vel += forward_accel * dt
 
@@ -84,7 +84,7 @@ class AccelToCmdVel:
 
         # Limit angular velocity to prevent excessive turning
         self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
-        rospy.loginfo(f"Angular velocity: {self.angular_vel:.2f} m/s")
+        # rospy.loginfo(f"Angular velocity: {self.angular_vel:.2f} m/s")
 
         # Create Twist message
         twist = Twist()
