@@ -19,8 +19,7 @@ class AccelToCmdVel:
         self.forward_vel = 0.0
         self.angular_vel = 0.0
         self.max_linear_vel = 0.2  # Maximum linear velocity (m/s)
-        self.max_angular_vel = 0.5  # Maximum angular velocity (rad/s)
-        self.Kp = 1  # Proportional control constant for angular velocity
+        self.max_angular_vel = 0.85  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 
         # Subscribers
@@ -46,7 +45,8 @@ class AccelToCmdVel:
         _, _, self.current_yaw = tf.transformations.euler_from_quaternion(
             [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         )
-        self.current_yaw = self.current_yaw +0.0
+        self.forward_vel = msg.twist.twist.linear.x
+        self.angular_vel = msg.twist.twist.angular.z
 
     def update_and_publish(self, event):
         # Calculate time step since last update
@@ -55,24 +55,29 @@ class AccelToCmdVel:
         rospy.loginfo(f"Time step: {dt} seconds")
         self.last_time = current_time
 
-        # Compute the magnitude and direction of the acceleration vector
-        accel_magnitude = math.sqrt(self.accel_x**2 + self.accel_y**2)
-        target_angle = math.atan2(self.accel_y, self.accel_x)
-
-        # Compute the difference between the target angle and the current orientation
-        angle_diff = target_angle - self.current_yaw  
-
-        # Normalize the angle difference to the range [-pi, pi]
-        angle_diff = (angle_diff + math.pi) % (2 * math.pi) - math.pi
-
         # Compute the forward acceleration and angular velocity
-        forward_accel = accel_magnitude * math.cos(angle_diff)
-        angular_acceleration = angle_diff*forward_accel
+        if self.forward_vel == 0:
+            if math.sin(self.current_yaw) == 0:
+                forward_accel = self.accel_x/math.cos(self.current_yaw)
+            elif math.cos(self.current_yaw) == 0:
+                forward_accel = self.accel_y/math.sin(self.current_yaw)
+            else:
+                forward_accel = self.accel_x/math.cos(self.current_yaw)
+        else:
+            if math.sin(self.current_yaw) == 0:
+                forward_accel = self.accel_x/math.cos(self.current_yaw)
+                self.angular_vel = self.accel_y/self.forward_vel / math.cos(self.current_yaw)
+            elif math.cos(self.current_yaw) == 0:
+                forward_accel = self.accel_y/math.sin(self.current_yaw)
+                self.angular_vel = -self.accel_x/self.forward_vel / math.sin(self.current_yaw)
+            else:
+                self.angular_vel = (self.accel_y/math.cos(self.current_yaw) - self.accel_x*math.tan(self.current_yaw)/math.cos(self.current_yaw))/self.forward_vel/((math.tan(self.current_yaw))**2+1)
+                forward_accel = (self.accel_y - self.forward_vel*math.cos(self.current_yaw)*self.angular_vel)/math.sin(self.current_yaw)
+        rospy.loginfo(f"Current Yaw: {self.current_yaw:.2f} ")
         rospy.loginfo(f"Forward velocity: {self.forward_vel:.2f} m/s")
-        rospy.loginfo(f"Forward accel: {forward_accel:.2f} m/s")
         # Integrate accelerations to update velocities
         self.forward_vel += forward_accel * dt
-        self.angular_vel += angular_acceleration * dt
+
 
         # Limit forward velocity to prevent excessive speed
         self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
@@ -80,7 +85,6 @@ class AccelToCmdVel:
         # Limit angular velocity to prevent excessive turning
         self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
         rospy.loginfo(f"Angular velocity: {self.angular_vel:.2f} m/s")
-        rospy.loginfo(f"Angular accel: {angular_acceleration:.2f} m/s")
 
         # Create Twist message
         twist = Twist()
