@@ -5,7 +5,7 @@
   
 
   <!-- Run the map server -->
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find multiple_robots_nav)/maps/roundabout1.yaml" >
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find multiple_robots_nav)/maps/roundabout2.yaml" >
     <param name="frame_id" value="map"/>
   </node>
 
@@ -16,9 +16,9 @@
   <!-- AMCL      -->
 
     <include file="$(find multiple_robots_nav)/launch/amcl_robot1.launch" >
-      <arg name="initial_pose_x" value="-5"/>
+      <arg name="initial_pose_x" value="-5.0"/>
       <arg name="initial_pose_y" value="0"/>
-      <arg name="initial_pose_a" value="0"/>
+      <arg name="initial_pose_a" value="0.0"/>
     </include>
     <include file="$(find multiple_robots_nav)/launch/amcl_robot2.launch" >
       <arg name="initial_pose_x" value="5"/>
@@ -30,7 +30,9 @@
     <include file="$(find multiple_robots_nav)/launch/move_base_robot1.launch" />
     <include file="$(find multiple_robots_nav)/launch/move_base_robot2.launch" />
 
-
+  <!-- Launching Acceleration converters for the robots-->
+  <node pkg="autonomous_nav" type="accl_to_vel_bot1.py" name="accl_to_vel_bot1" output="screen"/>
+  <node pkg="autonomous_nav" type="accl_to_vel_bot2.py" name="accl_to_vel_bot2" output="screen"/>
     
 
 </launch>

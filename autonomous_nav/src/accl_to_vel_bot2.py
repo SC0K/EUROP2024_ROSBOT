@@ -19,7 +19,7 @@ class AccelToCmdVel:
         self.forward_vel = 0.0
         self.angular_vel = 0.0
         self.max_linear_vel = 0.1 # Maximum linear velocity (m/s)
-        self.max_angular_vel = 0.4  # Maximum angular velocity (rad/s)
+        self.max_angular_vel = 1  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 
         # Subscribers

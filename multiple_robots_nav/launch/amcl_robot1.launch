@@ -2,7 +2,7 @@
  
 <launch>
   <master auto="start"/>
-  <arg name="initial_pose_x"  default="-1.0"/>
+  <arg name="initial_pose_x"  default="-5.0"/>
   <arg name="initial_pose_y"  default="0.0"/>
   <arg name="initial_pose_a"  default="0.0"/>
   
