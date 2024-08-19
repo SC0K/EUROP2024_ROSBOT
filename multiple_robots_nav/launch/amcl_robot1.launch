@@ -10,7 +10,7 @@
   <node pkg="amcl" type="amcl" name="robot1_amcl" output="screen">
     <remap from="scan" to="/robot1/scan"/>
     <param name="odom_frame_id" value="robot1_tf/robot1_tf/odom"/>
-    <param name="odom_model_type" value="diff-corrected"/>
+    <param name="odom_model_type" value="diff"/>
     <param name="base_frame_id" value="/robot1_tf/base_link"/>
     <param name="update_min_d" value="0.1"/>
     <param name="update_min_a" value="0.2"/>
@@ -21,7 +21,7 @@
     <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
     <remap from="amcl_pose"                 to="/robot1/amcl_pose"/>
     <remap from="particlecloud"             to="/robot1/particlecloud"/>
-    <remap from="initialpose"               to="/robot2/initialpose"/>
+    <remap from="initialpose"               to="/robot1/initialpose"/>
   </node>
 
   
