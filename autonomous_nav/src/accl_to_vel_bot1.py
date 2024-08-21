@@ -19,7 +19,7 @@ class AccelToCmdVel:
         self.forward_vel = 0.0
         self.angular_vel = 0.0
         self.max_linear_vel = 0.1  # Maximum linear velocity (m/s)
-        self.max_angular_vel = 1  # Maximum angular velocity (rad/s)
+        self.max_angular_vel = 2  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 
         # Subscribers
@@ -31,7 +31,7 @@ class AccelToCmdVel:
         self.cmd_vel_pub = rospy.Publisher('/robot1/cmd_vel', Twist, queue_size=10)
 
         # Timer to update and publish velocities
-        self.timer = rospy.Timer(rospy.Duration(0.4), self.update_and_publish)
+        self.timer = rospy.Timer(rospy.Duration(0.3), self.update_and_publish)
 
     def accel_x_callback(self, msg):
         self.accel_x = msg.data
@@ -64,15 +64,16 @@ class AccelToCmdVel:
             else:
                 forward_accel = self.accel_x/math.cos(self.current_yaw)
         else:
-            if math.sin(self.current_yaw) == 0:
+            if math.sin(self.current_yaw) == 0.0:
                 forward_accel = self.accel_x/math.cos(self.current_yaw)
                 self.angular_vel = self.accel_y/self.forward_vel / math.cos(self.current_yaw)
-            elif math.cos(self.current_yaw) == 0:
+            elif math.cos(self.current_yaw) == 0.0:
                 forward_accel = self.accel_y/math.sin(self.current_yaw)
                 self.angular_vel = -self.accel_x/self.forward_vel / math.sin(self.current_yaw)
             else:
-                self.angular_vel = (self.accel_y/math.cos(self.current_yaw) - self.accel_x*math.tan(self.current_yaw)/math.cos(self.current_yaw))/self.forward_vel/((math.tan(self.current_yaw))**2+1)
                 forward_accel = (self.accel_y - self.forward_vel*math.cos(self.current_yaw)*self.angular_vel)/math.sin(self.current_yaw)
+                self.angular_vel = (self.accel_y/math.cos(self.current_yaw) - self.accel_x*math.tan(self.current_yaw)/math.cos(self.current_yaw))/self.forward_vel/((math.tan(self.current_yaw))**2+1)
+                
         # rospy.loginfo(f"Current Yaw: {self.current_yaw:.2f} ")
         # rospy.loginfo(f"Forward velocity: {self.forward_vel:.2f} m/s")
         # Integrate accelerations to update velocities

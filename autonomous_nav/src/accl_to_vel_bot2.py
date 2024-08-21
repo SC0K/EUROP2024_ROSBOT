@@ -19,7 +19,7 @@ class AccelToCmdVel:
         self.forward_vel = 0.0
         self.angular_vel = 0.0
         self.max_linear_vel = 0.1 # Maximum linear velocity (m/s)
-        self.max_angular_vel = 1  # Maximum angular velocity (rad/s)
+        self.max_angular_vel = 4  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 
         # Subscribers
@@ -31,7 +31,7 @@ class AccelToCmdVel:
         self.cmd_vel_pub = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
 
         # Timer to update and publish velocities
-        self.timer = rospy.Timer(rospy.Duration(0.4), self.update_and_publish)
+        self.timer = rospy.Timer(rospy.Duration(0.2), self.update_and_publish)
 
     def accel_x_callback(self, msg):
         self.accel_x = msg.data
