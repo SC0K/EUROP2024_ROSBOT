@@ -31,7 +31,7 @@ class AccelToCmdVel:
         self.cmd_vel_pub = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
 
         # Timer to update and publish velocities
-        self.timer = rospy.Timer(rospy.Duration(0.2), self.update_and_publish)
+        self.timer = rospy.Timer(rospy.Duration(0.3), self.update_and_publish)
 
     def accel_x_callback(self, msg):
         self.accel_x = msg.data
@@ -83,7 +83,7 @@ class AccelToCmdVel:
         self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
 
         # Limit angular velocity to prevent excessive turning
-        self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
+        # self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
         # rospy.loginfo(f"Angular velocity: {self.angular_vel:.2f} m/s")
 
         # Create Twist message

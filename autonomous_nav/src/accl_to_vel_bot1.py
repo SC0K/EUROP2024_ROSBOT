@@ -19,7 +19,7 @@ class AccelToCmdVel:
         self.forward_vel = 0.0
         self.angular_vel = 0.0
         self.max_linear_vel = 0.1  # Maximum linear velocity (m/s)
-        self.max_angular_vel = 2  # Maximum angular velocity (rad/s)
+        self.max_angular_vel = 4  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 
         # Subscribers
@@ -84,7 +84,7 @@ class AccelToCmdVel:
         self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
 
         # Limit angular velocity to prevent excessive turning
-        self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
+        # self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
         # rospy.loginfo(f"Angular velocity: {self.angular_vel:.2f} m/s")
 
         # Create Twist message
