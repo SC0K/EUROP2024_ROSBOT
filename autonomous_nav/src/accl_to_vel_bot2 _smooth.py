@@ -10,7 +10,7 @@ import tf.transformations
 class AccelToCmdVel:
     def __init__(self):
         # Initialize the ROS node
-        rospy.init_node('accel_to_cmd_vel')
+        rospy.init_node('accel_to_cmd_vel2')
 
         # Parameters
         self.accel_x = 0.0
@@ -21,6 +21,12 @@ class AccelToCmdVel:
         self.max_linear_vel = 0.1 # Maximum linear velocity (m/s)
         self.max_angular_vel = 6  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
+
+        # List to store previous angular velocities for smoothing
+        self.previous_angular_velocities = [0.0, 0.0]  # Initialize with two zeros
+        
+        # Weight coefficients for the smoothing (weights must sum to 1 for a proper weighted average)
+        self.weights = [0.05, 0.1, 0.85] 
 
         # Subscribers
         rospy.Subscriber('/robot2/accel_x', Float32, self.accel_x_callback)
@@ -46,51 +52,59 @@ class AccelToCmdVel:
             [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         )
         self.forward_vel = msg.twist.twist.linear.x
+        
+        # Update angular velocity with the new message
         self.angular_vel = msg.twist.twist.angular.z
 
     def update_and_publish(self, event):
         # Calculate time step since last update
         current_time = rospy.Time.now()
         dt = (current_time - self.last_time).to_sec()
-        # rospy.loginfo(f"Time step: {dt} seconds")
         self.last_time = current_time
 
         # Compute the forward acceleration and angular velocity
         if self.forward_vel == 0:
             if math.sin(self.current_yaw) == 0:
-                forward_accel = self.accel_x/math.cos(self.current_yaw)
+                forward_accel = self.accel_x / math.cos(self.current_yaw)
             elif math.cos(self.current_yaw) == 0:
-                forward_accel = self.accel_y/math.sin(self.current_yaw)
+                forward_accel = self.accel_y / math.sin(self.current_yaw)
             else:
-                forward_accel = self.accel_x/math.cos(self.current_yaw)
+                forward_accel = self.accel_x / math.cos(self.current_yaw)
         else:
             if math.sin(self.current_yaw) == 0:
-                forward_accel = self.accel_x/math.cos(self.current_yaw)
-                self.angular_vel = self.accel_y/self.forward_vel / math.cos(self.current_yaw)
+                forward_accel = self.accel_x / math.cos(self.current_yaw)
+                self.angular_vel = self.accel_y / self.forward_vel / math.cos(self.current_yaw)
             elif math.cos(self.current_yaw) == 0:
-                forward_accel = self.accel_y/math.sin(self.current_yaw)
-                self.angular_vel = -self.accel_x/self.forward_vel / math.sin(self.current_yaw)
+                forward_accel = self.accel_y / math.sin(self.current_yaw)
+                self.angular_vel = -self.accel_x / self.forward_vel / math.sin(self.current_yaw)
             else:
-                self.angular_vel = (self.accel_y/math.cos(self.current_yaw) - self.accel_x*math.tan(self.current_yaw)/math.cos(self.current_yaw))/self.forward_vel/((math.tan(self.current_yaw))**2+1)
-                forward_accel = (self.accel_y - self.forward_vel*math.cos(self.current_yaw)*self.angular_vel)/math.sin(self.current_yaw)
-        # rospy.loginfo(f"Current Yaw: {self.current_yaw:.2f} ")
-        # rospy.loginfo(f"Forward velocity: {self.forward_vel:.2f} m/s")
+                self.angular_vel = (self.accel_y / math.cos(self.current_yaw) - self.accel_x * math.tan(self.current_yaw) / math.cos(self.current_yaw)) / self.forward_vel / ((math.tan(self.current_yaw)) ** 2 + 1)
+                forward_accel = (self.accel_y - self.forward_vel * math.cos(self.current_yaw) * self.angular_vel) / math.sin(self.current_yaw)
+
         # Integrate accelerations to update velocities
         self.forward_vel += forward_accel * dt
 
+        # Smooth the angular velocity using the weighted sum of the previous two and the current angular velocity
+        smoothed_angular_vel = (
+            self.weights[0] * self.previous_angular_velocities[0] +
+            self.weights[1] * self.previous_angular_velocities[1] +
+            self.weights[2] * self.angular_vel
+        )
+
+        # Update the list of previous angular velocities
+        self.previous_angular_velocities = [self.previous_angular_velocities[1], self.angular_vel]
 
         # Limit forward velocity to prevent excessive speed
         self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
         rospy.loginfo(f"Forward velocity robot2: {self.forward_vel:.2f} m/s")
 
         # Limit angular velocity to prevent excessive turning
-        self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
-        # rospy.loginfo(f"Angular velocity: {self.angular_vel:.2f} m/s")
+        smoothed_angular_vel = max(min(smoothed_angular_vel, self.max_angular_vel), -self.max_angular_vel)
 
         # Create Twist message
         twist = Twist()
         twist.linear.x = self.forward_vel
-        twist.angular.z = self.angular_vel
+        twist.angular.z = smoothed_angular_vel
 
         # Publish the velocity command
         self.cmd_vel_pub.publish(twist)
