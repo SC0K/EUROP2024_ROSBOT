@@ -10,7 +10,7 @@ import tf.transformations
 class AccelToCmdVel:
     def __init__(self):
         # Initialize the ROS node
-        rospy.init_node('accel_to_cmd_vel')
+        rospy.init_node('accel_to_cmd_vel2')
 
         # Parameters
         self.accel_x = 0.0
@@ -18,7 +18,7 @@ class AccelToCmdVel:
         self.current_yaw = 0.0
         self.forward_vel = 0.0
         self.angular_vel = 0.0
-        self.max_linear_vel = 0.1 # Maximum linear velocity (m/s)
+        self.max_linear_vel = 0.15 # Maximum linear velocity (m/s)
         self.max_angular_vel = 6  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 

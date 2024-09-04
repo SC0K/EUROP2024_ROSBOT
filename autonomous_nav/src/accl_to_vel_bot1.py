@@ -10,7 +10,7 @@ import tf.transformations
 class AccelToCmdVel:
     def __init__(self):
         # Initialize the ROS node
-        rospy.init_node('accel_to_cmd_vel')
+        rospy.init_node('accel_to_cmd_vel1')
 
         # Parameters
         self.accel_x = 0.0
@@ -18,7 +18,7 @@ class AccelToCmdVel:
         self.current_yaw = 0.0
         self.forward_vel = 0.0
         self.angular_vel = 0.0
-        self.max_linear_vel = 0.1  # Maximum linear velocity (m/s)
+        self.max_linear_vel = 0.15 # Maximum linear velocity (m/s)
         self.max_angular_vel = 6  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
 
@@ -64,17 +64,15 @@ class AccelToCmdVel:
             else:
                 forward_accel = self.accel_x/math.cos(self.current_yaw)
         else:
-            if math.sin(self.current_yaw) == 0.0:
+            if math.sin(self.current_yaw) == 0:
                 forward_accel = self.accel_x/math.cos(self.current_yaw)
                 self.angular_vel = self.accel_y/self.forward_vel / math.cos(self.current_yaw)
-            elif math.cos(self.current_yaw) == 0.0:
+            elif math.cos(self.current_yaw) == 0:
                 forward_accel = self.accel_y/math.sin(self.current_yaw)
                 self.angular_vel = -self.accel_x/self.forward_vel / math.sin(self.current_yaw)
             else:
                 self.angular_vel = (self.accel_y/math.cos(self.current_yaw) - self.accel_x*math.tan(self.current_yaw)/math.cos(self.current_yaw))/self.forward_vel/((math.tan(self.current_yaw))**2+1)
                 forward_accel = (self.accel_y - self.forward_vel*math.cos(self.current_yaw)*self.angular_vel)/math.sin(self.current_yaw)
-                
-                
         # rospy.loginfo(f"Current Yaw: {self.current_yaw:.2f} ")
         # rospy.loginfo(f"Forward velocity: {self.forward_vel:.2f} m/s")
         # Integrate accelerations to update velocities

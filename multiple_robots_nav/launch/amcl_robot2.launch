@@ -5,6 +5,7 @@
   <master auto="start"/>
   <arg name="initial_pose_x"  default="5.0"/>
   <arg name="initial_pose_y"  default="0.0"/>
+  <arg name="initial_pose_z"  default="0.0"/>
   <arg name="initial_pose_a"  default="0.0"/>
 
   <node pkg="amcl" type="amcl" name="robot2_amcl" output="screen">
@@ -18,6 +19,7 @@
     <!-- <param name="global_frame_id" value="map"/> -->
     <param name="initial_pose_x"            value="$(arg initial_pose_x)"/>
     <param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
+    <param name="initial_pose_z"            value="$(arg initial_pose_z)"/>
     <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
     <remap from="amcl_pose"                 to="/robot2/amcl_pose"/>
     <remap from="particlecloud"             to="/robot2/particlecloud"/>
