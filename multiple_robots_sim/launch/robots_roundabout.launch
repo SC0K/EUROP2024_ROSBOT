@@ -3,6 +3,8 @@
   <!-- No namespace here as we will share this description. Access with slash at the beginning -->
   <arg name="first_bot"  default="robot1_tf"/>
   <arg name="second_bot"  default="robot2_tf"/>
+  <arg name="third_bot"  default="robot3_tf"/>
+  <arg name="fourth_bot"  default="robot4_tf"/>
 
   <!-- BEGIN ROBOT 1 -->
   <group ns="robot1">
@@ -23,5 +25,25 @@
       <arg name="robot_name" value="robot2" />
     </include>
     <param name="tf_prefix" value="$(arg second_bot)" />
+  </group>
+
+  <!-- BEGIN ROBOT 3 -->
+  <group ns="robot3">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro' robot_namespace:=$(arg third_bot) odom_id:=$(arg third_bot)"/>
+    <include file="$(find multiple_robots_sim)/launch/one_robot.launch">
+      <arg name="init_pose" value="-x 0.15 -y 5 -z 0.1 -R 0 -P 0 -Y -1.57075" />
+      <arg name="robot_name" value="robot3" />
+    </include>
+    <param name="tf_prefix" value="$(arg third_bot)" />
+  </group>
+
+  <!-- BEGIN ROBOT 4 -->
+  <group ns="robot4">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro' robot_namespace:=$(arg fourth_bot) odom_id:=$(arg fourth_bot)"/>
+    <include file="$(find multiple_robots_sim)/launch/one_robot.launch">
+      <arg name="init_pose" value="-x -0.15 -y -5 -z 0.1 -R 0 -P 0 -Y 1.57075" />
+      <arg name="robot_name" value="robot4" />
+    </include>
+    <param name="tf_prefix" value="$(arg fourth_bot)" />
   </group>
 </launch>

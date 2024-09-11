@@ -21,6 +21,8 @@ class AccelToCmdVel:
         self.max_linear_vel = 0.15 # Maximum linear velocity (m/s)
         self.max_angular_vel = 6  # Maximum angular velocity (rad/s)
         self.last_time = rospy.Time.now()
+        self.last_accel_time = None # Track the last time accel messages were received
+        self.accel_timeout = 1.0    # Timeout in seconds for receiving accel messages
 
         # Subscribers
         rospy.Subscriber('/robot2/accel_x', Float32, self.accel_x_callback)
@@ -35,9 +37,11 @@ class AccelToCmdVel:
 
     def accel_x_callback(self, msg):
         self.accel_x = msg.data
+        self.last_accel_time = rospy.Time.now()  # Update the last received time
 
     def accel_y_callback(self, msg):
         self.accel_y = msg.data
+        self.last_accel_time = rospy.Time.now()  # Update the last received time
 
     def odom_callback(self, msg):
         # Extract the current yaw orientation from the odometry message
@@ -49,6 +53,12 @@ class AccelToCmdVel:
         self.angular_vel = msg.twist.twist.angular.z
 
     def update_and_publish(self, event):
+        # Check if accel messages have been received recently
+        if self.last_accel_time is None or (rospy.Time.now() - self.last_accel_time).to_sec() > self.accel_timeout:
+            rospy.loginfo("No recent acceleration data. Stopping the robot.")
+            self.publish_zero_velocity()
+            return
+
         # Calculate time step since last update
         current_time = rospy.Time.now()
         dt = (current_time - self.last_time).to_sec()
@@ -78,21 +88,23 @@ class AccelToCmdVel:
         # Integrate accelerations to update velocities
         self.forward_vel += forward_accel * dt
 
-
         # Limit forward velocity to prevent excessive speed
         self.forward_vel = max(min(self.forward_vel, self.max_linear_vel), -self.max_linear_vel)
-        rospy.loginfo(f"Forward velocity robot2: {self.forward_vel:.2f} m/s")
 
         # Limit angular velocity to prevent excessive turning
         self.angular_vel = max(min(self.angular_vel, self.max_angular_vel), -self.max_angular_vel)
-        # rospy.loginfo(f"Angular velocity: {self.angular_vel:.2f} m/s")
 
-        # Create Twist message
+        # Create and publish Twist message
         twist = Twist()
         twist.linear.x = self.forward_vel
         twist.angular.z = self.angular_vel
+        self.cmd_vel_pub.publish(twist)
 
-        # Publish the velocity command
+    def publish_zero_velocity(self):
+        # Publish zero velocity to stop the robot
+        twist = Twist()
+        twist.linear.x = 0.0
+        twist.angular.z = 0.0
         self.cmd_vel_pub.publish(twist)
 
 if __name__ == '__main__':
